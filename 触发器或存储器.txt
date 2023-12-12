@@ -1,0 +1,78 @@
+1.植物信息表
+触发器，当所填日期不等于当天日期，触发日期填写错误
+CREATE TRIGGER check_create_time
+BEFORE INSERT ON PlantTable
+FOR EACH ROW
+BEGIN
+  IF DATE(NEW.create_time) != CURDATE() THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = '创建时间填写错误，请确保创建时间为当天日期';
+  END IF;
+END;
+-- 验证语句
+INSERT INTO PlantTable (plant_id, species_name, equipment_name, create_people, create_time)
+VALUES ('P001', '玫瑰', '喷雾器', '张三', NOW());
+
+INSERT INTO PlantTable (plant_id, species_name, equipment_name, create_people, create_time)
+VALUES ('P0001', '玫瑰', '喷雾器', '张三', '2023-03-01');
+
+
+
+
+2.分类表
+存储器，存储前10条分类数据
+DELIMITER //
+
+CREATE PROCEDURE GetPlantClassifications()
+BEGIN
+  SELECT * FROM ClassificationTable WHERE classification_id < 10;
+END //
+
+DELIMITER ;
+-- 显示存储过程
+CALL GetPlantClassifications();
+
+
+
+
+3.治疗表
+存储器，存储治疗状态为已治疗的数据
+
+CREATE PROCEDURE GetTreatmented()
+BEGIN
+  SELECT * FROM treatmenttable WHERE treat_state  = '已治疗';
+END 
+-- 显示存储过程
+CALL GetTreatmented()
+
+4.防治表
+存储器，存储使用多菌灵的数据
+CREATE PROCEDURE GetDrug()
+BEGIN
+  SELECT * FROM preventtable WHERE drug_name  = '多菌灵';
+END 
+-- 显示存储过程
+CALL GetDrug()
+
+5.监测管理表
+触发器，pH值非法报错
+
+DELIMITER $$
+
+CREATE TRIGGER CheckPH
+BEFORE INSERT ON MonitorTable
+FOR EACH ROW
+BEGIN
+  IF NEW.ph <= 0 OR NEW.ph >= 14 THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'pH值非法，必须在1到14之间';
+  END IF;
+END$$
+
+DELIMITER ;
+验证数据
+INSERT INTO MonitorTable (plant_id, monitor_people, ph, temperature) VALUES ('001', 'John', 15, 25);
+
+
+
+

@@ -1,0 +1,64 @@
+-- 根据植物种名查找植物属于哪个科，哪个属，别名，以及分布区域
+SELECT classificationtable.species_name AS 种名,
+			 classificationtable.family_name AS 科,
+       classificationtable.genus_name AS 属,
+       distributiontable.province AS 省,
+       distributiontable.city AS 市,
+       town AS 县
+       
+FROM distributiontable
+JOIN classificationtable ON distributiontable.distribution_id = classificationtable.distribution_id
+JOIN planttable ON planttable.species_name = classificationtable.species_name AND planttable.species_name = 'spp.';
+
+
+-- 根据种名查找过往治疗记录
+SELECT
+  planttable.species_name AS 种名,
+  planttable.disease_name AS 疾病,
+  treatmenttable.treat_people AS 治疗人,
+  treatmenttable.treat_time AS 治疗时间,
+  treatmenttable.prevent_method AS 治疗措施,
+  preventtable.drug_name AS 治疗药剂,
+  preventtable.drug_amount AS 治疗量
+FROM planttable
+JOIN treatmenttable ON planttable.plant_id = treatmenttable.plant_id
+JOIN preventtable ON treatmenttable.prevent_method = preventtable.prevent_method
+WHERE planttable.species_name = '蔷薇属 spp.';
+
+
+-- 通过监测人员查要使用的所有设备
+SELECT monitortable.monitor_people AS 检测人, 
+planttable.species_name AS 植物名,
+ equipmentable.equipment_name AS 设备名称
+FROM monitortable
+JOIN planttable ON monitortable.plant_id = planttable.plant_id
+JOIN equipmentable ON planttable.equipment_name = equipmentable.equipment_name
+WHERE monitortable.monitor_people = '张三';
+
+-- 查询某省/区的植物受过的病虫害
+SELECT 
+       distributiontable.province AS 省,
+       distributiontable.city AS 市,
+       distributiontable.town AS 县,
+       classificationtable.species_name AS 植物种名,
+       planttable.disease_name AS 病虫害
+FROM distributiontable
+JOIN classificationtable 
+ON distributiontable.distribution_id = classificationtable.distribution_id
+JOIN planttable 
+ON planttable.species_name = classificationtable.species_name 
+WHERE distributiontable.province= '江苏省';
+
+-- 通过养护人查找使用过的所有试剂
+SELECT t.treat_people AS 养护人员, 
+       p.species_name AS 种名,
+       p.disease_name AS 病虫害,
+       pr.drug_name AS 药剂名称,
+       pr.drug_amount AS 药剂量
+FROM treatmenttable t
+JOIN planttable p ON t.plant_id = p.plant_id
+JOIN preventtable pr ON t.prevent_method = pr.prevent_method
+WHERE t.treat_people = '张三';
+
+
+
